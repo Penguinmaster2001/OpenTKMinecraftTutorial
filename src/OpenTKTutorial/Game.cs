@@ -1,5 +1,6 @@
 
-using OpenTK.Graphics.OpenGL;
+using StbImageSharp;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -23,6 +24,14 @@ internal class Game : GameWindow
          0.5f, -0.5f,  0.0f  // Bottom Right
     };
 
+    private float[] texCoords =
+    {
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f,
+        1.0f, 0.0f
+    };
+
     private uint[] indices =
     {
         3, 0, 1,
@@ -34,6 +43,9 @@ internal class Game : GameWindow
     private int vao;
     private int vbo;
     private int ibo;
+    private int textureID;
+    private int textureVbo;
+
     private int shaderProgram;
 
 
@@ -63,18 +75,37 @@ internal class Game : GameWindow
     {
         base.OnLoad();
 
+        // Create and bind VAO
         vao = GL.GenVertexArray();
+        GL.BindVertexArray(vao);
 
+        // Vertex VBO
         vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
         GL.BufferData(BufferTarget.ArrayBuffer, verts.Length * sizeof(float), verts, BufferUsageHint.StaticDraw);
 
-        GL.BindVertexArray(vao);
+        // Put Vertex VBO into slot 0 of VAO
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
         GL.EnableVertexArrayAttrib(vao, 0);
 
-        GL.BindVertexArray(0);
+        // Unbind Vertex VBO
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
+
+        // Texture VBO
+        textureVbo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, textureVbo);
+        GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Length * sizeof(float), texCoords, BufferUsageHint.StaticDraw);
+
+        // Put Texture VBO into slot 1 of VAO
+        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 0, 0);
+        GL.EnableVertexArrayAttrib(vao, 1);
+
+        // Unbind Texture VBO
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
+        // Unbind VAO
+        GL.BindVertexArray(0);
 
         ibo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
@@ -98,6 +129,22 @@ internal class Game : GameWindow
 
         GL.DeleteShader(vertexShader);
         GL.DeleteShader(fragmentShader);
+
+        textureID = GL.GenTexture();
+        GL.ActiveTexture(TextureUnit.Texture0);
+        GL.BindTexture(TextureTarget.Texture2D, textureID);
+
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) TextureWrapMode.Repeat);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
+
+        StbImage.stbi_set_flip_vertically_on_load(1);
+        ImageResult theRock = ImageResult.FromStream(File.OpenRead("/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Textures/TheRock.png"),
+                                                     ColorComponents.RedGreenBlueAlpha);
+
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, theRock.Width, theRock.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, theRock.Data);
+        GL.BindTexture(TextureTarget.Texture2D, 0);
     }
 
 
@@ -109,6 +156,7 @@ internal class Game : GameWindow
         GL.DeleteVertexArray(vao);
         GL.DeleteBuffer(vbo);
         GL.DeleteBuffer(ibo);
+        GL.DeleteTexture(textureID);
         GL.DeleteProgram(shaderProgram);
     }
 
@@ -122,6 +170,9 @@ internal class Game : GameWindow
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
         GL.UseProgram(shaderProgram);
+
+        GL.BindTexture(TextureTarget.Texture2D, textureID);
+
         GL.BindVertexArray(vao);
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
         GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
