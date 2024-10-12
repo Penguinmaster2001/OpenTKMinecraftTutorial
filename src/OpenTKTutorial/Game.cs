@@ -17,14 +17,23 @@ internal class Game : GameWindow
 
     private float[] verts =
     {
-         0.0f,  0.5f,  0.0f,
-        -0.5f, -0.5f,  0.0f,
-         0.5f, -0.5f,  0.0f
+         0.5f,  0.5f,  0.0f, // Top Right
+        -0.5f,  0.5f,  0.0f, // Top Left
+        -0.5f, -0.5f,  0.0f, // Bottom Left
+         0.5f, -0.5f,  0.0f  // Bottom Right
+    };
+
+    private uint[] indices =
+    {
+        3, 0, 1,
+        3, 1, 2
     };
 
 
     // Render pipeline vars
     private int vao;
+    private int vbo;
+    private int ibo;
     private int shaderProgram;
 
 
@@ -56,7 +65,7 @@ internal class Game : GameWindow
 
         vao = GL.GenVertexArray();
 
-        int vbo = GL.GenBuffer();
+        vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
         GL.BufferData(BufferTarget.ArrayBuffer, verts.Length * sizeof(float), verts, BufferUsageHint.StaticDraw);
 
@@ -64,8 +73,13 @@ internal class Game : GameWindow
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
         GL.EnableVertexArrayAttrib(vao, 0);
 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         GL.BindVertexArray(0);
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+
+        ibo = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
         shaderProgram = GL.CreateProgram();
 
@@ -93,6 +107,8 @@ internal class Game : GameWindow
         base.OnUnload();
 
         GL.DeleteVertexArray(vao);
+        GL.DeleteBuffer(vbo);
+        GL.DeleteBuffer(ibo);
         GL.DeleteProgram(shaderProgram);
     }
 
@@ -105,11 +121,11 @@ internal class Game : GameWindow
         GL.ClearColor(0.2f, 0.3f, 0.8f, 1.0f);
         GL.Clear(ClearBufferMask.ColorBufferBit);
 
-
         GL.UseProgram(shaderProgram);
         GL.BindVertexArray(vao);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
+        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.DrawArrays(PrimitiveType.Triangles, 0, 4);
 
         Context.SwapBuffers();
     }
@@ -188,12 +204,12 @@ internal class Game : GameWindow
 
 
 
-    private void CheckGLError(string location)
+    private static void CheckGLError(string location)
     {
         ErrorCode error = GL.GetError();
         if (error != ErrorCode.NoError)
         {
-            Console.WriteLine($"OpenGL error at {location}: {error}");
+            throw new Exception($"OpenGL error at {location}: {error}");
         }
     }
 }
