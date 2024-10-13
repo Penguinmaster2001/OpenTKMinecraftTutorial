@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTKTutorial", "OpenTKTutorial.csproj", "{5BE8A064-7BD4-4DBA-B285-8AC3B9D7B411}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTKTutorial", "OpenTKTutorial.csproj", "{C3C73B94-9384-4FD6-BD0B-66C79CFCF410}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5BE8A064-7BD4-4DBA-B285-8AC3B9D7B411}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BE8A064-7BD4-4DBA-B285-8AC3B9D7B411}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5BE8A064-7BD4-4DBA-B285-8AC3B9D7B411}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5BE8A064-7BD4-4DBA-B285-8AC3B9D7B411}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3C73B94-9384-4FD6-BD0B-66C79CFCF410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3C73B94-9384-4FD6-BD0B-66C79CFCF410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3C73B94-9384-4FD6-BD0B-66C79CFCF410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3C73B94-9384-4FD6-BD0B-66C79CFCF410}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {9DDDCA1E-E162-49DB-95AA-9D399EB269A1}
+		SolutionGuid = {363988D4-5D39-482E-8E68-0A106F0E3693}
 	EndGlobalSection
 EndGlobal

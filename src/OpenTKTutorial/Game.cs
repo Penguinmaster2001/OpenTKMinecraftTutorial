@@ -16,27 +16,93 @@ internal class Game : GameWindow
     private int windowWidth;
     private int windowHeight;
 
-    private float[] verts =
-    {
-         0.5f,  0.5f,  0.0f, // Top Right
-        -0.5f,  0.5f,  0.0f, // Top Left
-        -0.5f, -0.5f,  0.0f, // Bottom Left
-         0.5f, -0.5f,  0.0f  // Bottom Right
-    };
+    private List<Vector3> verts = [
+        // front face
+        new Vector3(-0.5f, 0.5f, 0.5f), // topleft vert
+        new Vector3(0.5f, 0.5f, 0.5f), // topright vert
+        new Vector3(0.5f, -0.5f, 0.5f), // bottomright vert
+        new Vector3(-0.5f, -0.5f, 0.5f), // bottomleft vert
+        // right face
+        new Vector3(0.5f, 0.5f, 0.5f), // topleft vert
+        new Vector3(0.5f, 0.5f, -0.5f), // topright vert
+        new Vector3(0.5f, -0.5f, -0.5f), // bottomright vert
+        new Vector3(0.5f, -0.5f, 0.5f), // bottomleft vert
+        // back face
+        new Vector3(0.5f, 0.5f, -0.5f), // topleft vert
+        new Vector3(-0.5f, 0.5f, -0.5f), // topright vert
+        new Vector3(-0.5f, -0.5f, -0.5f), // bottomright vert
+        new Vector3(0.5f, -0.5f, -0.5f), // bottomleft vert
+        // left face
+        new Vector3(-0.5f, 0.5f, -0.5f), // topleft vert
+        new Vector3(-0.5f, 0.5f, 0.5f), // topright vert
+        new Vector3(-0.5f, -0.5f, 0.5f), // bottomright vert
+        new Vector3(-0.5f, -0.5f, -0.5f), // bottomleft vert
+        // top face
+        new Vector3(-0.5f, 0.5f, -0.5f), // topleft vert
+        new Vector3(0.5f, 0.5f, -0.5f), // topright vert
+        new Vector3(0.5f, 0.5f, 0.5f), // bottomright vert
+        new Vector3(-0.5f, 0.5f, 0.5f), // bottomleft vert
+        // bottom face
+        new Vector3(-0.5f, -0.5f, 0.5f), // topleft vert
+        new Vector3(0.5f, -0.5f, 0.5f), // topright vert
+        new Vector3(0.5f, -0.5f, -0.5f), // bottomright vert
+        new Vector3(-0.5f, -0.5f, -0.5f), // bottomleft vert
+    ];
 
-    private float[] texCoords =
-    {
-        1.0f, 1.0f,
-        0.0f, 1.0f,
-        0.0f, 0.0f,
-        1.0f, 0.0f
-    };
+    private List<Vector2> texCoords = [
+        new Vector2(0f, 1f),
+        new Vector2(1f, 1f),
+        new Vector2(1f, 0f),
+        new Vector2(0f, 0f),
 
-    private uint[] indices =
-    {
-        3, 0, 1,
-        3, 1, 2
-    };
+        new Vector2(0f, 1f),
+        new Vector2(1f, 1f),
+        new Vector2(1f, 0f),
+        new Vector2(0f, 0f),
+
+        new Vector2(0f, 1f),
+        new Vector2(1f, 1f),
+        new Vector2(1f, 0f),
+        new Vector2(0f, 0f),
+
+        new Vector2(0f, 1f),
+        new Vector2(1f, 1f),
+        new Vector2(1f, 0f),
+        new Vector2(0f, 0f),
+
+        new Vector2(0f, 1f),
+        new Vector2(1f, 1f),
+        new Vector2(1f, 0f),
+        new Vector2(0f, 0f),
+
+        new Vector2(0f, 1f),
+        new Vector2(1f, 1f),
+        new Vector2(1f, 0f),
+        new Vector2(0f, 0f),
+    ];
+
+    private uint[] indices = [
+        // first face
+        // top triangle
+        0, 1, 2,
+        // bottom triangle
+        2, 3, 0,
+
+        4, 5, 6,
+        6, 7, 4,
+
+        8, 9, 10,
+        10, 11, 8,
+
+        12, 13, 14,
+        14, 15, 12,
+
+        16, 17, 18,
+        18, 19, 16,
+
+        20, 21, 22,
+        22, 23, 20
+    ];
 
 
     // Render pipeline vars
@@ -47,6 +113,9 @@ internal class Game : GameWindow
     private int textureVbo;
 
     private int shaderProgram;
+
+
+    private float yRot = 0.0f;
 
 
 
@@ -82,7 +151,7 @@ internal class Game : GameWindow
         // Vertex VBO
         vbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, verts.Length * sizeof(float), verts, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, verts.Count * Vector3.SizeInBytes, verts.ToArray(), BufferUsageHint.StaticDraw);
 
         // Put Vertex VBO into slot 0 of VAO
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
@@ -95,7 +164,7 @@ internal class Game : GameWindow
         // Texture VBO
         textureVbo = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, textureVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Length * sizeof(float), texCoords, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Count * Vector2.SizeInBytes, texCoords.ToArray(), BufferUsageHint.StaticDraw);
 
         // Put Texture VBO into slot 1 of VAO
         GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 0, 0);
@@ -145,6 +214,8 @@ internal class Game : GameWindow
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, theRock.Width, theRock.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, theRock.Data);
         GL.BindTexture(TextureTarget.Texture2D, 0);
+
+        GL.Enable(EnableCap.DepthTest);
     }
 
 
@@ -167,11 +238,29 @@ internal class Game : GameWindow
         base.OnRenderFrame(args);
 
         GL.ClearColor(0.2f, 0.3f, 0.8f, 1.0f);
-        GL.Clear(ClearBufferMask.ColorBufferBit);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         GL.UseProgram(shaderProgram);
 
         GL.BindTexture(TextureTarget.Texture2D, textureID);
+
+
+        // Transformation matrices
+        Matrix4 model = Matrix4.Identity;
+        Matrix4 view = Matrix4.Identity;
+        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(90.0f), windowWidth / windowHeight, 0.1f, 100.0f);
+
+        model = Matrix4.CreateRotationY(2.0f * yRot);
+        model *= Matrix4.CreateRotationX(0.5f * yRot);
+        view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
+
+        int modelLocation = GL.GetUniformLocation(shaderProgram, "model");
+        int viewLocation = GL.GetUniformLocation(shaderProgram, "view");
+        int projectionLocation = GL.GetUniformLocation(shaderProgram, "projection");
+
+        GL.UniformMatrix4(modelLocation, true, ref model);
+        GL.UniformMatrix4(viewLocation, true, ref view);
+        GL.UniformMatrix4(projectionLocation, true, ref projection);
 
         GL.BindVertexArray(vao);
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
@@ -186,6 +275,8 @@ internal class Game : GameWindow
     protected override void OnUpdateFrame(FrameEventArgs args)
     {
         base.OnUpdateFrame(args);
+
+        yRot += 2.0f * (float) args.Time;
     }
 
 

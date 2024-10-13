@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{732AC845-9BC0-4239-8CE9-3B8113BBE7B5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9D9AF7BB-5D58-4231-A483-C99ADAE37D1B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTKTutorial", "src\OpenTKTutorial\OpenTKTutorial.csproj", "{85788873-930D-4FAB-AE76-3A21DCFFEA0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenTKTutorial", "src\OpenTKTutorial\OpenTKTutorial.csproj", "{BF432DDB-5509-4CAD-BD4D-EA0BC5D971AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,16 +13,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{85788873-930D-4FAB-AE76-3A21DCFFEA0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{85788873-930D-4FAB-AE76-3A21DCFFEA0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{85788873-930D-4FAB-AE76-3A21DCFFEA0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{85788873-930D-4FAB-AE76-3A21DCFFEA0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF432DDB-5509-4CAD-BD4D-EA0BC5D971AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF432DDB-5509-4CAD-BD4D-EA0BC5D971AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF432DDB-5509-4CAD-BD4D-EA0BC5D971AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF432DDB-5509-4CAD-BD4D-EA0BC5D971AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{85788873-930D-4FAB-AE76-3A21DCFFEA0E} = {732AC845-9BC0-4239-8CE9-3B8113BBE7B5}
+		{BF432DDB-5509-4CAD-BD4D-EA0BC5D971AF} = {9D9AF7BB-5D58-4231-A483-C99ADAE37D1B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1C86FE3A-E02F-4D26-89FE-625C30EE7B57}
