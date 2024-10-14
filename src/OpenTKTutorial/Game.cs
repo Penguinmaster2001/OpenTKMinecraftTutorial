@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 
 
@@ -13,6 +14,8 @@ namespace OpenTKTutorial;
 
 internal class Game : GameWindow
 {
+    private Camera camera;
+
     private int windowWidth;
     private int windowHeight;
 
@@ -113,7 +116,9 @@ internal class Game : GameWindow
     private int textureVbo;
 
     private int shaderProgram;
-
+    private string vertexShaderPath = "/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Shaders/default.vert";
+    private string fragmentShaderPath = "/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Shaders/default.frag";
+    private string texturePath = "/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Textures/TheRock.png";
 
     private float yRot = 0.0f;
 
@@ -125,6 +130,8 @@ internal class Game : GameWindow
         windowHeight = height;
 
         CenterWindow(new Vector2i(windowWidth, windowHeight));
+
+        camera = new(windowWidth, windowHeight, Vector3.Zero);
     }
 
 
@@ -184,11 +191,11 @@ internal class Game : GameWindow
         shaderProgram = GL.CreateProgram();
 
         int vertexShader  = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertexShader, LoadShaderSource("/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Shaders/default.vert"));
+        GL.ShaderSource(vertexShader, LoadShaderSource(vertexShaderPath));
         GL.CompileShader(vertexShader);
 
         int fragmentShader  = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragmentShader, LoadShaderSource("/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Shaders/default.frag"));
+        GL.ShaderSource(fragmentShader, LoadShaderSource(fragmentShaderPath));
         GL.CompileShader(fragmentShader);
 
         GL.AttachShader(shaderProgram, vertexShader);
@@ -209,7 +216,7 @@ internal class Game : GameWindow
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
 
         StbImage.stbi_set_flip_vertically_on_load(1);
-        ImageResult theRock = ImageResult.FromStream(File.OpenRead("/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Textures/TheRock.png"),
+        ImageResult theRock = ImageResult.FromStream(File.OpenRead(texturePath),
                                                      ColorComponents.RedGreenBlueAlpha);
 
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, theRock.Width, theRock.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, theRock.Data);
@@ -247,12 +254,12 @@ internal class Game : GameWindow
 
         // Transformation matrices
         Matrix4 model = Matrix4.Identity;
-        Matrix4 view = Matrix4.Identity;
-        Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(90.0f), windowWidth / windowHeight, 0.1f, 100.0f);
+        Matrix4 view = camera.ViewMatrix;
+        Matrix4 projection = camera.ProjectionMatrix;
 
-        model = Matrix4.CreateRotationY(2.0f * yRot);
+        model *= Matrix4.CreateRotationY(2.0f * yRot);
         model *= Matrix4.CreateRotationX(0.5f * yRot);
-        view = Matrix4.CreateTranslation(0.0f, 0.0f, -3.0f);
+        model *= Matrix4.CreateTranslation(0.0f, 0.0f, -5.0f);
 
         int modelLocation = GL.GetUniformLocation(shaderProgram, "model");
         int viewLocation = GL.GetUniformLocation(shaderProgram, "view");
@@ -277,6 +284,16 @@ internal class Game : GameWindow
         base.OnUpdateFrame(args);
 
         yRot += 2.0f * (float) args.Time;
+
+        MouseState mouseState = MouseState;
+        KeyboardState keyboardState = KeyboardState;
+
+        if (keyboardState.IsKeyReleased(Keys.Escape))
+        {
+            CursorState = CursorState == CursorState.Grabbed ? CursorState.Normal : CursorState.Grabbed;
+        }
+
+        camera.Update(keyboardState, mouseState, args);
     }
 
 
@@ -302,56 +319,56 @@ internal class Game : GameWindow
 
 
 
-    private static int CreateShaderProgram(string vertexPath, string fragmentPath)
-    {
-        int vertexShader = CompileShader(ShaderType.VertexShader, File.ReadAllText(vertexPath));
-        int fragmentShader = CompileShader(ShaderType.FragmentShader, File.ReadAllText(fragmentPath));
+    // private static int CreateShaderProgram(string vertexPath, string fragmentPath)
+    // {
+    //     int vertexShader = CompileShader(ShaderType.VertexShader, File.ReadAllText(vertexPath));
+    //     int fragmentShader = CompileShader(ShaderType.FragmentShader, File.ReadAllText(fragmentPath));
 
-        int program = GL.CreateProgram();
-        GL.AttachShader(program, vertexShader);
-        GL.AttachShader(program, fragmentShader);
-        GL.LinkProgram(program);
+    //     int program = GL.CreateProgram();
+    //     GL.AttachShader(program, vertexShader);
+    //     GL.AttachShader(program, fragmentShader);
+    //     GL.LinkProgram(program);
 
-        GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int success);
-        if (success == 0)
-        {
-            string infoLog = GL.GetProgramInfoLog(program);
-            throw new Exception($"Program linking failed: {infoLog}");
-        }
+    //     GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int success);
+    //     if (success == 0)
+    //     {
+    //         string infoLog = GL.GetProgramInfoLog(program);
+    //         throw new Exception($"Program linking failed: {infoLog}");
+    //     }
 
-        GL.DeleteShader(vertexShader);
-        GL.DeleteShader(fragmentShader);
+    //     GL.DeleteShader(vertexShader);
+    //     GL.DeleteShader(fragmentShader);
 
-        return program;
-    }
-
-
-
-    private static int CompileShader(ShaderType type, string source)
-    {
-        int shader = GL.CreateShader(type);
-        GL.ShaderSource(shader, source);
-        GL.CompileShader(shader);
-
-        GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
-        if (success == 0)
-        {
-            string infoLog = GL.GetShaderInfoLog(shader);
-            GL.DeleteShader(shader);
-            throw new Exception($"{type} compilation failed: {infoLog}");
-        }
-
-        return shader;
-    }
+    //     return program;
+    // }
 
 
 
-    private static void CheckGLError(string location)
-    {
-        ErrorCode error = GL.GetError();
-        if (error != ErrorCode.NoError)
-        {
-            throw new Exception($"OpenGL error at {location}: {error}");
-        }
-    }
+    // private static int CompileShader(ShaderType type, string source)
+    // {
+    //     int shader = GL.CreateShader(type);
+    //     GL.ShaderSource(shader, source);
+    //     GL.CompileShader(shader);
+
+    //     GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
+    //     if (success == 0)
+    //     {
+    //         string infoLog = GL.GetShaderInfoLog(shader);
+    //         GL.DeleteShader(shader);
+    //         throw new Exception($"{type} compilation failed: {infoLog}");
+    //     }
+
+    //     return shader;
+    // }
+
+
+
+    // private static void CheckGLError(string location)
+    // {
+    //     ErrorCode error = GL.GetError();
+    //     if (error != ErrorCode.NoError)
+    //     {
+    //         throw new Exception($"OpenGL error at {location}: {error}");
+    //     }
+    // }
 }
