@@ -1,10 +1,10 @@
 
-using StbImageSharp;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using OpenTKTutorial.Graphics;
 
 
 
@@ -84,7 +84,7 @@ internal class Game : GameWindow
         new Vector2(0f, 0f),
     ];
 
-    private uint[] indices = [
+    private List<uint> indices = [
         // first face
         // top triangle
         0, 1, 2,
@@ -109,13 +109,11 @@ internal class Game : GameWindow
 
 
     // Render pipeline vars
-    private int vao;
-    private int vbo;
-    private int ibo;
-    private int textureID;
-    private int textureVbo;
+    private VAO vao;
+    private IBO ibo;
+    private Texture texture;
 
-    private int shaderProgram;
+    private ShaderProgram shaderProgram;
     private string vertexShaderPath = "/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Shaders/default.vert";
     private string fragmentShaderPath = "/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Shaders/default.frag";
     private string texturePath = "/home/penguin/Documents/Projects/OpenTKTutorial/src/OpenTKTutorial/Textures/TheRock.png";
@@ -132,6 +130,18 @@ internal class Game : GameWindow
         CenterWindow(new Vector2i(windowWidth, windowHeight));
 
         camera = new(windowWidth, windowHeight, Vector3.Zero);
+
+        vao = new();
+        VBO<Vector3> vbo = new(verts);
+        vao.LinkToVAO(0, 3, vbo);
+        VBO<Vector2> texVbo = new(texCoords);
+        vao.LinkToVAO(1, 2, texVbo);
+
+        ibo = new(indices);
+
+        shaderProgram = new(vertexShaderPath, fragmentShaderPath);
+
+        texture = new(texturePath);
     }
 
 
@@ -151,77 +161,6 @@ internal class Game : GameWindow
     {
         base.OnLoad();
 
-        // Create and bind VAO
-        vao = GL.GenVertexArray();
-        GL.BindVertexArray(vao);
-
-        // Vertex VBO
-        vbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, verts.Count * Vector3.SizeInBytes, verts.ToArray(), BufferUsageHint.StaticDraw);
-
-        // Put Vertex VBO into slot 0 of VAO
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
-        GL.EnableVertexArrayAttrib(vao, 0);
-
-        // Unbind Vertex VBO
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-
-
-        // Texture VBO
-        textureVbo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, textureVbo);
-        GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Count * Vector2.SizeInBytes, texCoords.ToArray(), BufferUsageHint.StaticDraw);
-
-        // Put Texture VBO into slot 1 of VAO
-        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 0, 0);
-        GL.EnableVertexArrayAttrib(vao, 1);
-
-        // Unbind Texture VBO
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-
-        // Unbind VAO
-        GL.BindVertexArray(0);
-
-        ibo = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-
-        shaderProgram = GL.CreateProgram();
-
-        int vertexShader  = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertexShader, LoadShaderSource(vertexShaderPath));
-        GL.CompileShader(vertexShader);
-
-        int fragmentShader  = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragmentShader, LoadShaderSource(fragmentShaderPath));
-        GL.CompileShader(fragmentShader);
-
-        GL.AttachShader(shaderProgram, vertexShader);
-        GL.AttachShader(shaderProgram, fragmentShader);
-
-        GL.LinkProgram(shaderProgram);
-
-        GL.DeleteShader(vertexShader);
-        GL.DeleteShader(fragmentShader);
-
-        textureID = GL.GenTexture();
-        GL.ActiveTexture(TextureUnit.Texture0);
-        GL.BindTexture(TextureTarget.Texture2D, textureID);
-
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) TextureWrapMode.Repeat);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) TextureWrapMode.Repeat);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Nearest);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Nearest);
-
-        StbImage.stbi_set_flip_vertically_on_load(1);
-        ImageResult theRock = ImageResult.FromStream(File.OpenRead(texturePath),
-                                                     ColorComponents.RedGreenBlueAlpha);
-
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, theRock.Width, theRock.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, theRock.Data);
-        GL.BindTexture(TextureTarget.Texture2D, 0);
-
         GL.Enable(EnableCap.DepthTest);
     }
 
@@ -231,11 +170,10 @@ internal class Game : GameWindow
     {
         base.OnUnload();
 
-        GL.DeleteVertexArray(vao);
-        GL.DeleteBuffer(vbo);
-        GL.DeleteBuffer(ibo);
-        GL.DeleteTexture(textureID);
-        GL.DeleteProgram(shaderProgram);
+        texture.Delete();
+        ibo.Delete();
+        vao.Delete();
+        shaderProgram.Delete();
     }
 
 
@@ -247,10 +185,10 @@ internal class Game : GameWindow
         GL.ClearColor(0.2f, 0.3f, 0.8f, 1.0f);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        GL.UseProgram(shaderProgram);
-
-        GL.BindTexture(TextureTarget.Texture2D, textureID);
-
+        shaderProgram.Bind();
+        vao.Bind();
+        ibo.Bind();
+        texture.Bind();
 
         // Transformation matrices
         Matrix4 model = Matrix4.Identity;
@@ -261,17 +199,15 @@ internal class Game : GameWindow
         model *= Matrix4.CreateRotationX(0.5f * yRot);
         model *= Matrix4.CreateTranslation(0.0f, 0.0f, -5.0f);
 
-        int modelLocation = GL.GetUniformLocation(shaderProgram, "model");
-        int viewLocation = GL.GetUniformLocation(shaderProgram, "view");
-        int projectionLocation = GL.GetUniformLocation(shaderProgram, "projection");
+        int modelLocation = GL.GetUniformLocation(shaderProgram.ID, "model");
+        int viewLocation = GL.GetUniformLocation(shaderProgram.ID, "view");
+        int projectionLocation = GL.GetUniformLocation(shaderProgram.ID, "projection");
 
         GL.UniformMatrix4(modelLocation, true, ref model);
         GL.UniformMatrix4(viewLocation, true, ref view);
         GL.UniformMatrix4(projectionLocation, true, ref projection);
 
-        GL.BindVertexArray(vao);
-        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
-        GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+        GL.DrawElements(PrimitiveType.Triangles, indices.Count, DrawElementsType.UnsignedInt, 0);
         GL.DrawArrays(PrimitiveType.Triangles, 0, 4);
 
         Context.SwapBuffers();
