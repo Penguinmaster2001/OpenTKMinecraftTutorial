@@ -84,15 +84,15 @@ internal class Chunk
                 {
                     if (y < columnHeight - 2)
                     {
-                        blocks[x, y, z] = new(x, y, z, BlockType.TheRock);
+                        blocks[x, y, z] = new(x, y, z, BlockType.Rock);
                     }
                     else if (y < columnHeight)
                     {
-                        blocks[x, y, z] = new(x, y, z, BlockType.Donal);
+                        blocks[x, y, z] = new(x, y, z, BlockType.Dirt);
                     }
                     else if (y == columnHeight)
                     {
-                        blocks[x, y, z] = new(x, y, z, BlockType.JungKook);
+                        blocks[x, y, z] = new(x, y, z, BlockType.Grass);
                     }
                     else
                     {

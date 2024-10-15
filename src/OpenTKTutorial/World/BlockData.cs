@@ -10,9 +10,10 @@ namespace OpenTKTutorial.World;
 internal enum BlockType
 {
     Empty,
-    TheRock,
-    JungKook,
-    Donal
+    Grass,
+    Dirt,
+    Rock,
+    Gem
 }
 
 
