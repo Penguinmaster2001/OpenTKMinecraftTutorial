@@ -3,13 +3,13 @@ using OpenTK.Mathematics;
 
 
 
-namespace OpenTKTutorial.World;
+namespace OpenTKTutorial.Blocks;
 
 
 
 internal class Block
 {
-    public Vector3 Position;
+    public Vector3i Position;
     public BlockType Type;
 
 
@@ -19,9 +19,9 @@ internal class Block
 
 
 
-    public Block(float x, float y, float z, BlockType blockType = BlockType.Empty) : this(new Vector3(x, y, z), blockType) { }
+    public Block(int x, int y, int z, BlockType blockType = BlockType.Empty) : this(new Vector3i(x, y, z), blockType) { }
 
-    public Block(Vector3 position, BlockType blockType = BlockType.Empty)
+    public Block(Vector3i position, BlockType blockType = BlockType.Empty)
     {
         Position = position;
         Type = blockType;

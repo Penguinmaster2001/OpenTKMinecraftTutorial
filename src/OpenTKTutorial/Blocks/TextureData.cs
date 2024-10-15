@@ -3,7 +3,7 @@ using OpenTK.Mathematics;
 
 
 
-namespace OpenTKTutorial.World;
+namespace OpenTKTutorial.Blocks;
 
 
 
@@ -28,7 +28,7 @@ internal static class TextureData
                 { Faces.Left  , BlockSlotUV(2, 0) },
                 { Faces.Right , BlockSlotUV(2, 0) },
                 { Faces.Top   , BlockSlotUV(1, 0) },
-                { Faces.Bottom, BlockSlotUV(2, 0) }
+                { Faces.Bottom, BlockSlotUV(3, 0) }
             }
         },
         { BlockType.Dirt, new() {

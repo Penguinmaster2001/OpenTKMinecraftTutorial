@@ -3,7 +3,7 @@ using OpenTK.Mathematics;
 
 
 
-namespace OpenTKTutorial.World;
+namespace OpenTKTutorial.Blocks;
 
 
 

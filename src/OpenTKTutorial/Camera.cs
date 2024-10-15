@@ -139,10 +139,19 @@ internal class Camera
             keyboardDirection += -Vector3.UnitY;
         }
 
+        if (keyboardState.IsKeyDown(Keys.LeftControl))
+        {
+            MovementSpeed += 5.0f * frameDelta;
+        }
+        else
+        {
+            MovementSpeed = 10.0f;
+        }
+
         Velocity = MovementSpeed * keyboardDirection;
 
         Vector3 mouseCurPos = new(mouseState.X, -mouseState.Y, 0.0f);
-        if (firstMove)
+        if (firstMove || frameDelta > 0.05f)
         {
             mouseLastPos = mouseCurPos;
             firstMove = false;

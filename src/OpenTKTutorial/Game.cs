@@ -6,7 +6,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using OpenTK.Mathematics;
 
 using OpenTKTutorial.Graphics;
-using OpenTKTutorial.World;
+using OpenTKTutorial.Blocks;
 
 
 
@@ -16,9 +16,9 @@ namespace OpenTKTutorial;
 
 internal class Game : GameWindow
 {
-    private Camera camera;
+    private readonly Camera camera;
 
-    private Chunk? chunk;
+    private readonly World world;
 
     private int windowWidth;
     private int windowHeight;
@@ -37,6 +37,8 @@ internal class Game : GameWindow
         CenterWindow(new Vector2i(windowWidth, windowHeight));
 
         camera = new(windowWidth, windowHeight, Vector3.Zero);
+
+        world = new();
     }
 
 
@@ -58,8 +60,6 @@ internal class Game : GameWindow
 
         shaderProgram = new(vertexShaderPath, fragmentShaderPath);
 
-        chunk = new();
-
         GL.Enable(EnableCap.DepthTest);
         GL.FrontFace(FrontFaceDirection.Cw);
         GL.Enable(EnableCap.CullFace);
@@ -72,7 +72,7 @@ internal class Game : GameWindow
     {
         base.OnUnload();
 
-        chunk?.Delete();
+        world.Delete();
         shaderProgram?.Delete();
     }
 
@@ -100,7 +100,7 @@ internal class Game : GameWindow
             GL.UniformMatrix4(viewLocation, true, ref view);
             GL.UniformMatrix4(projectionLocation, true, ref projection);
 
-            chunk?.Render(shaderProgram);
+            world.Render(shaderProgram);
         }
         else
         {
@@ -126,6 +126,7 @@ internal class Game : GameWindow
         }
 
         camera.Update(keyboardState, mouseState, args);
+        world.Update(camera.Position);
     }
 
 
